@@ -82,7 +82,7 @@ int main (int argc, char * argv[]) {
 
     TIMERSTART(query_RH)
     size_t query_error_RH = 0;
-    //# pragma omp parallel for reduction(+:query_error_RH)
+    # pragma omp parallel for reduction(+:query_error_RH)
     for (uint64_t i = 0; i < max_elements/vals_per_key; i++) {
         auto result = RHHash.get(keys[i]);
         std::sort(result.begin(), result.end());
