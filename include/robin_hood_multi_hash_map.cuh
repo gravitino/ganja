@@ -42,7 +42,7 @@ struct RobinHoodMultiHashMap {
 
         # pragma omp parallel for
         for (index_t index = 0; index < capacity; index++)
-            data[index].store(entry_t::empty);
+            data[index].store(entry_t::get_empty());
     }
 
     ~RobinHoodMultiHashMap() {
@@ -63,7 +63,7 @@ struct RobinHoodMultiHashMap {
 
             entry_t probed = data[index].load(std::memory_order_relaxed);
 
-            if (probed == entry_t::empty ||
+            if (probed == entry_t::get_empty() ||
                (probed.get_cnt() != entry_t::mask_cnt &&
                 probed.get_cnt() < iters))
                 return result;
@@ -84,9 +84,8 @@ struct RobinHoodMultiHashMap {
         if (key >= entry_t::mask_key || val >= entry_t::mask_val)
             return false;
 
-        entry_t nil = entry_t::empty, entry;
+        entry_t nil = entry_t::get_empty(), entry;
         index_t index = hash_func(key) % capacity;
-        index_t query_length = 1;
 
         for (index_t iters = 0; iters < probe_length; ++iters) {
 
@@ -96,10 +95,10 @@ struct RobinHoodMultiHashMap {
             if (triple == nil) {
                 std::atomic_compare_exchange_strong(&data[index], &nil, entry);
 
-                if (nil == entry_t::empty)
+                if (nil == entry_t::get_empty())
                     return ++size;
                 else
-                    nil = entry_t::empty;
+                    nil = entry_t::get_empty();
             }
 
             triple = data[index].load(std::memory_order_relaxed);

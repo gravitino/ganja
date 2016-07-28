@@ -40,7 +40,7 @@ struct OpenAddressingMultiHashMap {
 
         # pragma omp parallel for
         for (index_t index = 0; index < capacity; index++)
-            data[index].store(entry_t::empty);
+            data[index].store(entry_t::get_empty());
     }
 
     ~OpenAddressingMultiHashMap() {
@@ -61,7 +61,7 @@ struct OpenAddressingMultiHashMap {
 
             entry_t probed = data[index].load(std::memory_order_relaxed);
 
-            if (probed == entry_t::empty)
+            if (probed == entry_t::get_empty())
                 return result;
 
             if (probed.get_key() == key)
@@ -80,7 +80,7 @@ struct OpenAddressingMultiHashMap {
         if (key >= entry_t::mask_key || val >= entry_t::mask_val)
             return false;
 
-        entry_t nil = entry_t::empty, entry; entry.set_pair(key, val);
+        entry_t nil = entry_t::get_empty(), entry; entry.set_pair(key, val);
         index_t index = hash_func(key) % capacity;
 
         for (index_t iters = 0; iters < probe_length; ++iters) {
@@ -90,10 +90,10 @@ struct OpenAddressingMultiHashMap {
             if (pair == nil) {
                 std::atomic_compare_exchange_strong(&data[index], &nil, entry);
 
-                if (nil == entry_t::empty)
+                if (nil == entry_t::get_empty())
                     return ++size;
                 else
-                    nil = entry_t::empty;
+                    nil = entry_t::get_empty();
             }
 
             index = prob_func(index, iters, key) % capacity;

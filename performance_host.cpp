@@ -12,7 +12,7 @@ int main (int argc, char * argv[]) {
     constexpr uint64_t num_elements = 1UL << 28;
 
     // configure hash map
-    constexpr double load = 0.80;
+    constexpr double load = 0.66;
     constexpr uint64_t capacity = num_elements/load;
     constexpr uint64_t bits_key = 30, bits_val = 28, bits_cnt = 4;
 

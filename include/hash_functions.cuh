@@ -10,7 +10,7 @@
 
 struct nvidia_hash_uint32_t {
 
-    HOSTDEVICEINLINEQUALIFIER
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
     uint32_t operator() (
         uint32_t x) const {
 
@@ -27,7 +27,7 @@ struct nvidia_hash_uint32_t {
 
 struct mueller_hash_uint32_t {
 
-    HOSTDEVICEINLINEQUALIFIER
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
     uint32_t operator() (
         uint32_t x) const {
 
@@ -42,7 +42,7 @@ struct mueller_hash_uint32_t {
 
 struct murmur_integer_finalizer_hash_uint32_t {
 
-    HOSTDEVICEINLINEQUALIFIER
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
     uint32_t operator() (
         uint32_t x) const {
 
@@ -59,7 +59,7 @@ struct murmur_integer_finalizer_hash_uint32_t {
 struct identity_map_t {
 
     template <
-        typename index_t> HOSTDEVICEINLINEQUALIFIER
+        typename index_t> HOSTDEVICEQUALIFIER INLINEQUALIFIER
     index_t operator() (
         index_t x) const {
 
@@ -74,7 +74,7 @@ struct identity_map_t {
 struct linear_probing_scheme_t {
 
     template <
-        typename index_t> HOSTDEVICEINLINEQUALIFIER
+        typename index_t> HOSTDEVICEQUALIFIER INLINEQUALIFIER
     index_t operator() (
         const index_t& index,
         const index_t& iters,
