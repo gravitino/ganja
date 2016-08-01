@@ -31,12 +31,12 @@ void insert_kernel(
     const index_t thid = blockDim.x*blockIdx.x+threadIdx.x;
     const index_t bits_key = entry_t::bits_for_key;
     const index_t bits_val = entry_t::bits_for_val;
-    entry_t nil = entry_t::get_empty();
+    const entry_t nil = entry_t::get_empty();
 
 
     for (index_t i = thid; i < num_elements; i += blockDim.x*gridDim.x) {
 
-        const index_t key = hash_func(i) % ((1UL << bits_key)-1);
+        const index_t key = (i/2) % ((1UL << bits_key)-1);
         const index_t val = i % (1UL << bits_val);
 
         index_t index = hash_func(key) % capacity;
@@ -47,16 +47,16 @@ void insert_kernel(
             const entry_t pair = Data[index];
 
             if (pair == nil) {
-                auto target = (unsigned long long int *) Data + index;
-                auto expect = (unsigned long long int  ) nil.payload;
-                auto shall  = (unsigned long long int  ) entry.payload;
-                auto old = atomicCAS(target, expect, shall);
+                const auto target = (unsigned long long int *) Data + index;
+                const auto expect = (unsigned long long int  ) nil.payload;
+                const auto value  = (unsigned long long int  ) entry.payload;
+                const auto result = atomicCAS(target, expect, value);
 
-                if (old == nil.payload)
+                if (result == nil.payload)
                     return;
             }
 
-            index = prob_func(index, iters, key) % capacity;
+            index = prob_func(index, key, iters) % capacity;
         }
     }
 }
@@ -65,8 +65,8 @@ int main () {
 
     cudaSetDevice(0);
 
-    uint64_t num_elements = 1UL << 27;
-    uint64_t capacity = num_elements/0.31;
+    uint64_t num_elements = 1UL << 20;
+    uint64_t capacity = num_elements/0.9;
     typedef KeyValuePair_t<uint64_t, 32, 32> entry_t;
 
     TIMERSTART(malloc_data)
@@ -78,11 +78,11 @@ int main () {
     init_kernel<<<SDIV(capacity, 1024), 1024>>>(Data, capacity);          CUERR
     TIMERSTOP(init_data)
 
-    const auto hash_func = nvidia_hash_uint32_t();
+    const auto hash_func = identity_map_t();
     const auto prob_func = linear_probing_scheme_t();
 
     TIMERSTART(insert_data)
-    insert_kernel<<<SDIV(num_elements, 1024), 1024>>>(Data,
+    insert_kernel<<<SDIV(num_elements, 32), 32>>>(Data,
                                                       num_elements,
                                                       capacity,
                                                       hash_func,
