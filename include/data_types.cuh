@@ -74,7 +74,7 @@ struct KeyValuePair_t {
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     index_t get_val() const {
-        return (payload & (mask_val << bits_val)) >> bits_key;
+        return (payload & (mask_val << bits_key)) >> bits_key;
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
